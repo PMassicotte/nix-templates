@@ -46,7 +46,7 @@
           cargoLock = {
             lockFile = "${inputs.arf}/Cargo.lock";
             outputHashes = {
-              "crossterm-0.29.0" = "sha256-vL6xZHyQyQFnDyoQywpeo0q6c0FtDJ59XVmo4vIN5pQ=";
+              "crossterm-0.29.0" = "sha256-G57NGBvfZtedKQjwQMoxz1JSVH8LAPlCBeSv+DE8HiM=";
             };
           };
 
