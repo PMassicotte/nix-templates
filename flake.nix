@@ -7,23 +7,29 @@
       templates = {
         r-project = {
           path = ./templates/r-project;
-          description = "R development environment with R.nvim integration";
+          description = "R + Quarto development environment with R.nvim integration";
           welcomeText = ''
-            # R Nix Development Environment
+            # R + Quarto Nix Development Environment
 
             ## Getting started
             - Run `direnv allow` to activate the environment (if using direnv)
             - Enter the shell with `nix develop`
 
             ## Package layout
-            - `ideRPackages`     — editor support (httpgd, data.table); rarely changed
+            - `ideRPackages`     — editor support (nvimcom, httpgd, data.table); rarely changed
+            - `quartoRPackages`  — Quarto integration (rmarkdown, downlit, xml2, sessioninfo, quarto); rarely changed
             - `projectRPackages` — analysis packages (cli, fs); edit per project
 
             ## What's included
-            - R with httpgd, data.table, cli, and fs
+            - R with nvimcom, httpgd, data.table, cli, fs, and Quarto support
+            - quarto CLI, patched for https://github.com/NixOS/nixpkgs/issues/519484
+              (pandoc "syntax-highlighting"/"highlight-style" mismatch) and a related
+              jog.lua table-rendering crash
             - arf (modern Rust-based R console)
             - jarl (fast R linter)
-            - nvimcom auto-built by R.nvim into .r-libs/ on first use
+            - nvimcom baked directly into R_LIBS_SITE (not left to R.nvim's
+              auto-install into .r-libs/, which is timing-sensitive and can
+              intermittently print "package 'nvimcom' ... was not found")
           '';
         };
 
