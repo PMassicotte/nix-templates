@@ -46,7 +46,7 @@
           cargoLock = {
             lockFile = "${inputs.arf}/Cargo.lock";
             outputHashes = {
-              "crossterm-0.29.0" = "sha256-G57NGBvfZtedKQjwQMoxz1JSVH8LAPlCBeSv+DE8HiM=";
+              "crossterm-0.29.0" = "sha256-fHHE9Uf6PlFcasFSBVIuIh2hhpFjJW0/z9F0zTvc38Q=";
             };
           };
 
@@ -78,7 +78,8 @@
         # 1. Add a flake input:  inputs.myPkg = { url = "github:owner/repo"; flake = false; };
         # 2. Build it in the overlay:
         #    myPkg = final.rPackages.buildRPackage {
-        #      name = "myPkg";
+        #      pname = "myPkg";
+        #      version = "unstable";
         #      src = inputs.myPkg;
         #      propagatedBuildInputs = with final.rPackages; [ dep1 dep2 ];
         #    };

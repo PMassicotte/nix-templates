@@ -84,7 +84,8 @@
           # prints "package 'nvimcom' ... was not found". Baking it into
           # R_LIBS_SITE avoids the timing issue entirely.
           nvimcom = prev.rPackages.buildRPackage {
-            name = "nvimcom";
+            pname = "nvimcom";
+            version = "unstable";
             src = inputs.rNvim;
             sourceRoot = "source/nvimcom";
 
@@ -114,7 +115,7 @@
           cargoLock = {
             lockFile = "${inputs.arf}/Cargo.lock";
             outputHashes = {
-              "crossterm-0.29.0" = "sha256-G57NGBvfZtedKQjwQMoxz1JSVH8LAPlCBeSv+DE8HiM=";
+              "crossterm-0.29.0" = "sha256-fHHE9Uf6PlFcasFSBVIuIh2hhpFjJW0/z9F0zTvc38Q=";
             };
           };
 
