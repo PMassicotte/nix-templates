@@ -1,0 +1,7 @@
+[lint]
+# Every rule category, including TESTTHAT (this template is for R packages,
+# which have a tests/testthat/ suite) and DPLYR.
+# DPLYR/TESTTHAT are package-specific and require R + installed packages to
+# resolve function origins, so `jarl check` must run inside the flake's dev
+# shell.
+select = ["COMM", "CORR", "SUSP", "PERF", "READ", "TESTTHAT", "DPLYR"]

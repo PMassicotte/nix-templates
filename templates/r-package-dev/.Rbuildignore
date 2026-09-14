@@ -4,6 +4,9 @@
 ^\.envrc$
 ^\.direnv$
 
+# Linter config
+^jarl\.toml$
+
 # Git
 ^\.git$
 ^\.github$
