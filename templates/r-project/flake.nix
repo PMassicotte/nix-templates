@@ -3,12 +3,6 @@
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-  # Track arf on main; run `nix flake update arf` (or `nix flake update`) to upgrade
-  inputs.arf = {
-    url = "github:eitsupi/arf";
-    flake = false;
-  };
-
   inputs.rNvim = {
     url = "github:R-nvim/R.nvim";
     flake = false;
@@ -17,7 +11,6 @@
   outputs =
     { self, ... }@inputs:
     let
-      lib = inputs.nixpkgs.lib;
       supportedSystems = [
         "x86_64-linux"
         "aarch64-linux"
@@ -103,36 +96,6 @@
           };
         };
 
-        # Build arf (modern Rust-based R console) from the flake input.
-        # To upgrade: run `nix flake update arf` (or `nix flake update`).
-        # outputHashes only needs updating if arf changes its crossterm git pin.
-        arf = final.rustPlatform.buildRustPackage {
-          pname = "arf";
-          version = inputs.arf.shortRev or "unstable";
-
-          src = inputs.arf;
-
-          cargoLock = {
-            lockFile = "${inputs.arf}/Cargo.lock";
-            outputHashes = {
-              "crossterm-0.29.0" = "sha256-fHHE9Uf6PlFcasFSBVIuIh2hhpFjJW0/z9F0zTvc38Q=";
-            };
-          };
-
-          # Two cd/tilde tests fail in the Nix sandbox (no $HOME), skip them
-          doCheck = false;
-
-          buildInputs = with final; lib.optionals stdenv.isDarwin [ darwin.apple_sdk.frameworks.Security ];
-          nativeBuildInputs = with final; [ pkg-config ];
-
-          meta = {
-            description = "A modern Rust-based R console with fuzzy history, tree-sitter highlighting, and vi/emacs modes";
-            homepage = "https://github.com/eitsupi/arf";
-            license = lib.licenses.mit;
-            mainProgram = "arf";
-          };
-        };
-
         # IDE packages — required by R.nvim editor features, stable across projects
         ideRPackages = with final.rPackages; [
           nvimcom # R.nvim <-> Neovim communication
@@ -170,6 +133,11 @@
         # Create rWrapper with packages (for LSP and R.nvim)
         wrappedR = final.rWrapper.override { packages = rPackageList; };
 
+        # arf (modern Rust-based R console, from nixpkgs) wrapped with the same
+        # R packages as wrappedR. Named separately: overriding `arf` itself
+        # would make arfWrapper wrap itself (infinite recursion).
+        wrappedArf = final.arfWrapper.override { packages = rPackageList; };
+
       };
 
       devShells = forEachSupportedSystem (
@@ -179,7 +147,7 @@
             packages = with pkgs; [
               wrappedR # R with packages for LSP
               quarto # patched quarto CLI, for `quarto render`/`quarto preview`/`quarto publish`
-              arf # modern Rust-based R console
+              wrappedArf # arf with the same R packages as wrappedR
               jarl # fast R linter (from nixpkgs)
             ];
 
