@@ -22,9 +22,7 @@
 
             ## What's included
             - R with nvimcom, httpgd, data.table, cli, fs, and Quarto support
-            - quarto CLI, patched for https://github.com/NixOS/nixpkgs/issues/519484
-              (pandoc "syntax-highlighting"/"highlight-style" mismatch) and a related
-              jog.lua table-rendering crash
+            - quarto CLI
             - arf (modern Rust-based R console)
             - jarl (fast R linter)
             - nvimcom baked directly into R_LIBS_SITE (not left to R.nvim's

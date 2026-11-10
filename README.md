@@ -13,22 +13,11 @@ A collection of Nix flake templates for reproducible development environments.
 
 R environment with R.nvim/Neovim integration and Quarto support.
 
-**Includes:** R, quarto (patched), arf, jarl, nvimcom, httpgd, data.table, rmarkdown, downlit, xml2, sessioninfo
+**Includes:** R, quarto, arf, jarl, nvimcom, httpgd, data.table, rmarkdown, downlit, xml2, sessioninfo
 
 ```bash
 nix flake init -t github:PMassicotte/nix-templates#r-project
 ```
-
-The `quarto` CLI is patched for two upstream issues that otherwise break most
-renders:
-
-- [NixOS/nixpkgs#519484](https://github.com/NixOS/nixpkgs/issues/519484):
-  quarto 1.9.x emits the pandoc defaults key `syntax-highlighting`, but the
-  pandoc bundled in nixpkgs only understands `highlight-style`, so any render
-  crashes with `Unknown option "syntax-highlighting"`.
-- A related `jog.lua` crash (`Don't know how to traverse TableBody`) on any
-  page with a `gt()`/`kable()` table, from the same nixpkgs pandoc/quarto
-  version mismatch.
 
 `nvimcom` is built and baked directly into `R_LIBS_SITE` rather than left to
 R.nvim's own auto-install into `.r-libs/`: that auto-install path is timing

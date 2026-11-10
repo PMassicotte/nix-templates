@@ -24,7 +24,6 @@
           f {
             pkgs = import inputs.nixpkgs {
               inherit system;
-              config.allowBroken = true;
               overlays = [ inputs.self.overlays.default ];
             };
           }
@@ -32,28 +31,6 @@
     in
     {
       overlays.default = final: prev: rec {
-        # https://github.com/NixOS/nixpkgs/issues/519484
-        quarto = prev.quarto.overrideAttrs (old: {
-          postInstall = (old.postInstall or "") + ''
-            # quarto 1.9.x passes "syntax-highlighting" as a pandoc defaults
-            # key, but vanilla pandoc 3.x only recognizes "highlight-style".
-            # Rename it.
-            sed -i 's/kSyntaxHighlighting = "syntax-highlighting"/kSyntaxHighlighting = "highlight-style"/' $out/bin/quarto.js
-            sed -i 's/"--syntax-highlighting"/"--highlight-style"/g' $out/bin/quarto.js
-
-            # pandoc's Table AST gained a TableBody case that jog.lua
-            # (quarto's filter for shifting Blocks/Inlines around) doesn't
-            # know how to traverse, breaking any page with a gt()/kable()
-            # table ("Don't know how to traverse TableBody").
-            substituteInPlace $out/share/filters/modules/jog.lua \
-              --replace-fail "elseif tp == 'pandoc TableHead' or tp == 'pandoc TableFoot' or" \
-                "elseif tp == 'pandoc TableBody' or tp == 'TableBody' then
-    element.head = jogger(element.head)
-    element.body = jogger(element.body)
-  elseif tp == 'pandoc TableHead' or tp == 'pandoc TableFoot' or"
-          '';
-        });
-
         rPackages = prev.rPackages // {
           # rPackages.quarto (the R wrapper around the quarto CLI) propagates a
           # `quarto` build input for its SystemRequirements, whose pname also
@@ -61,12 +38,12 @@
           # pname, so that propagated CLI copy silently shadows the actual R
           # library and `library(quarto)` fails with "no package called
           # 'quarto'" even though it's listed in quartoRPackages below. Drop
-          # the propagated CLI dep — the patched `quarto` above is already put
+          # the propagated CLI dep — the nixpkgs `quarto` CLI is already put
           # on PATH directly via devShells' `packages`, so nothing is lost.
           quarto = prev.rPackages.quarto.overrideAttrs (old: {
-            propagatedBuildInputs = builtins.filter (
-              p: (p.pname or "") != "quarto"
-            ) (old.propagatedBuildInputs or [ ]);
+            propagatedBuildInputs = builtins.filter (p: (p.pname or "") != "quarto") (
+              old.propagatedBuildInputs or [ ]
+            );
           });
 
           # R.nvim's communication package, baked directly into R_LIBS_SITE.
@@ -81,12 +58,6 @@
             version = "unstable";
             src = inputs.rNvim;
             sourceRoot = "source/nvimcom";
-
-            buildInputs = with final; [
-              R
-              gcc
-              gnumake
-            ];
 
             meta = {
               description = "R.nvim communication package";
@@ -104,21 +75,12 @@
         ];
 
         # Quarto-integration packages — stable across projects.
-        #
-        # NB: `final.rPackages.quarto` must be referenced explicitly here (not
-        # via `with final.rPackages;`) because this `rec` block also defines a
-        # sibling `quarto` (the CLI, above). In Nix, a name bound in an
-        # enclosing lexical scope always shadows the same name pulled in via
-        # `with`, so a bare `quarto` in a `with final.rPackages; [...]` list
-        # would silently resolve to the CLI derivation instead of the R
-        # package, and `library(quarto)` would fail to find it.
-        quartoRPackages = (with final.rPackages; [
+        quartoRPackages = with final.rPackages; [
           rmarkdown
           downlit # code-link: true support
           xml2 # downlit dependency
           sessioninfo # sessioninfo::session_info() in report footers
-        ]) ++ [
-          final.rPackages.quarto # quarto::quarto_render()/quarto_preview() from an R session
+          quarto # quarto::quarto_render()/quarto_preview() from an R session
         ];
 
         # Project packages — specific to this analysis, the reproducible core
@@ -146,7 +108,7 @@
           default = pkgs.mkShell {
             packages = with pkgs; [
               wrappedR # R with packages for LSP
-              quarto # patched quarto CLI, for `quarto render`/`quarto preview`/`quarto publish`
+              quarto # quarto CLI, for `quarto render`/`quarto preview`/`quarto publish`
               wrappedArf # arf with the same R packages as wrappedR
               jarl # fast R linter (from nixpkgs)
             ];
